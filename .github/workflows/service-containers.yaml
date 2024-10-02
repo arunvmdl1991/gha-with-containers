@@ -1,0 +1,39 @@
+name: Running multiple containers
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    test:
+      runs-on: ubuntu-latest
+  
+      services:
+        redis:
+          image: redis
+          ports:
+            - 6379:6379
+        
+        postgres:
+          image: postgres:13
+          env:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: test_db
+          ports:
+            - 5432:5432
+  
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Install dependencies
+          run: npm install
+  
+        - name: Run tests
+          env:
+            DATABASE_URL: postgres://postgres:password@localhost:5432/test_db
+            REDIS_URL: redis://localhost:6379
+          run: npm test
+  
